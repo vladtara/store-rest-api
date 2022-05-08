@@ -7,14 +7,13 @@ from resources.items import Item, Items
 from resources.store import Store, StoreList
 from datetime import timedelta
 import os
-import re
 
 try:
     uri = os.getenv("DATABASE_URL")  # or other relevant config var
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
 except:
-    print("error")
+    pass
 
 app = Flask(__name__)
 app.secret_key = "skdnmlcnevnle332d2"
