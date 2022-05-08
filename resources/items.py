@@ -67,3 +67,5 @@ class Items(Resource):
         row = ItemModule.select_all()
         if row:
             return {'items': [i.json() for i in row]}
+        else:
+            return {"items": []}
