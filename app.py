@@ -32,11 +32,6 @@ def customized_error_handler(error):
     }), error.status_code
 
 
-@app.before_first_request
-def creatr_table():
-    db.create_all()
-
-
 api = Api(app)
 
 api.add_resource(Item, "/item/<string:name>")
