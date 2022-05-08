@@ -6,13 +6,22 @@ from resources.users import Register
 from resources.items import Item, Items
 from resources.store import Store, StoreList
 from datetime import timedelta
+import os
+import re
+
+try:
+    uri = os.getenv("DATABASE_URL")  # or other relevant config var
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+except:
+    print("error")
 
 app = Flask(__name__)
 app.secret_key = "skdnmlcnevnle332d2"
 app.config['JWT_AUTH_URL_RULE'] = '/login'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydata.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = uri if uri else 'sqlite:///mydata.db'
 jwt = JWT(app, authenticate, identity_function)
 
 
