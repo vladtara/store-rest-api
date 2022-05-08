@@ -5,6 +5,7 @@ from security import authenticate, identity as identity_function
 from resources.users import Register
 from resources.items import Item, Items
 from resources.store import Store, StoreList
+from resources.greeting import Greeting
 from datetime import timedelta
 import os
 
@@ -42,6 +43,7 @@ def customized_error_handler(error):
 
 api = Api(app)
 
+api.add_resource(Greeting, "/")
 api.add_resource(Item, "/item/<string:name>")
 api.add_resource(Items, "/items")
 api.add_resource(Register, "/register")
