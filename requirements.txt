@@ -15,3 +15,4 @@ six==1.16.0
 SQLAlchemy==1.4.36
 Werkzeug==2.1.0
 zipp==3.7.0
+uwsgi
