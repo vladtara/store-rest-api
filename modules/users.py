@@ -3,6 +3,7 @@ from db import db
 
 class UserModule(db.Model):
     __tablename__ = "users"
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80))

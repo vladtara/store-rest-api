@@ -47,6 +47,7 @@ class Item(Resource):
             try:
                 item = ItemModule(name, **data)
                 item.save_to_db()
+
             except:
                 return {"message": "An error occurred inserting the item."}, 500
             return {'message': "An item with name '{}' is created.".format(name)}, 201
