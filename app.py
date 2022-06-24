@@ -6,7 +6,7 @@ from resources.users import Register, User, Users, UserLogin, UserLogout, TokenR
 from resources.items import Item, Items
 from resources.store import Store, StoreList
 from resources.greeting import Greeting
-from blocklist import blocklist
+from modules.blocklist import Blocklist
 
 from datetime import timedelta
 import os
@@ -37,7 +37,7 @@ def add_claims_to_jwt(identity):
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
-    return jwt_payload["jti"] in blocklist
+    return Blocklist.find_by_jti(jwt_payload["jti"]) is not None
 
 
 @jwt.expired_token_loader

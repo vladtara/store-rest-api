@@ -1,3 +1,4 @@
+from modules.blocklist import Blocklist
 from modules.users import UserModule
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import (
@@ -9,6 +10,7 @@ from flask_jwt_extended import (
 )
 from hmac import compare_digest
 from blocklist import blocklist
+from datetime import datetime, timezone
 
 _user_parser = reqparse.RequestParser()
 _user_parser.add_argument('username',
@@ -50,8 +52,8 @@ class UserLogin(Resource):
 class UserLogout(Resource):
     @jwt_required()
     def post(cls):
-        jti = get_jwt()["jti"]
-        blocklist.add(jti)
+        Blocklist(jti=get_jwt()["jti"], created_at=datetime.now(
+            timezone.utc)).add_jti()
         return {"message": "Successfully logged out"}, 200
 
 
