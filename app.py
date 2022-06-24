@@ -1,14 +1,14 @@
 from flask import Flask, jsonify
 from flask_restful import Api
-from flask_jwt import JWT
+from flask_jwt_extended import JWTManager
 
-from resources.users import Register, User, Users
+from resources.users import Register, User, Users, UserLogin, UserLogout, TokenRefresh
 from resources.items import Item, Items
 from resources.store import Store, StoreList
 from resources.greeting import Greeting
+from blocklist import blocklist
 
 from datetime import timedelta
-from security import authenticate, identity as identity_function
 import os
 
 try:
@@ -20,28 +20,60 @@ except:
 
 app = Flask(__name__)
 app.secret_key = "skdnmlcnevnle332d2"
-app.config['JWT_AUTH_URL_RULE'] = '/login'
-app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
+app.config['JWT_SECRET_KEY'] = "fdsfkds;33wejvk3"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = uri if uri else 'sqlite:///mydata.db'
-jwt = JWT(app, authenticate, identity_function)
+jwt = JWTManager(app)
 
 
-@jwt.auth_response_handler
-def customized_response_handler(access_token, identity):
+@jwt.additional_claims_loader
+def add_claims_to_jwt(identity):
+    if identity == 1:
+        return {'admin': True}
+    else:
+        return {'admin': False}
+
+
+@jwt.token_in_blocklist_loader
+def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
+    return jwt_payload["jti"] in blocklist
+
+
+@jwt.expired_token_loader
+def expired_callback():
     return jsonify({
-        'access_token': access_token.decode('utf-8'),
-        'user_id': identity.id
-    })
+        "massage": "The token has expired"
+    }), 401
 
 
-@jwt.jwt_error_handler
-def customized_error_handler(error):
+@jwt.invalid_token_loader
+def invalid_callback(err):
     return jsonify({
-        'message': error.description,
-        'code': error.status_code
-    }), error.status_code
+        "massage": "The token is invalid",
+        "err": err
+    }), 401
+
+
+@jwt.unauthorized_loader
+def unauthorized_callback():
+    return jsonify({
+        "massage": "The token unauthorized"
+    }), 401
+
+
+@jwt.needs_fresh_token_loader
+def fresh_callback():
+    return jsonify({
+        "massage": "The token have to be freshed"
+    }), 401
+
+
+@jwt.revoked_token_loader
+def revoked_callback():
+    return jsonify({
+        "massage": "The token has revoked"
+    }), 401
 
 
 api = Api(app)
@@ -50,6 +82,9 @@ api.add_resource(Greeting, "/")
 api.add_resource(Item, "/item/<string:name>")
 api.add_resource(Items, "/items")
 api.add_resource(Register, "/register")
+api.add_resource(UserLogin, "/login")
+api.add_resource(UserLogout, "/logout")
+api.add_resource(TokenRefresh, "/refresh")
 api.add_resource(User, "/user/<int:id>")
 api.add_resource(Users, "/users")
 api.add_resource(Store, "/store/<string:name>")

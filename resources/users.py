@@ -1,26 +1,58 @@
 from modules.users import UserModule
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    get_jwt,
+    jwt_required
+)
+from hmac import compare_digest
+from blocklist import blocklist
+
+_user_parser = reqparse.RequestParser()
+_user_parser.add_argument('username',
+                          type=str,
+                          required=True,
+                          help="This field cannot be left blank!"
+                          )
+_user_parser.add_argument('password',
+                          type=str,
+                          required=True,
+                          help="This field cannot be left blank!"
+                          )
 
 
 class Register(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('username',
-                        type=str,
-                        required=True,
-                        help="This field cannot be left blank!"
-                        )
-    parser.add_argument('password',
-                        type=str,
-                        required=True,
-                        help="This field cannot be left blank!"
-                        )
-
     def post(self):
-        data = Register.parser.parse_args()
+        data = _user_parser.parse_args()
         if UserModule.find_by_username(data['username']):
             return {"message": "User with that username already exists."}, 400
         UserModule(**data).save_to_db()
         return {"message": "User created successfully."}, 201
+
+
+class UserLogin(Resource):
+    @classmethod
+    def post(cls):
+        data = _user_parser.parse_args()
+        user = UserModule.find_by_username(data['username'])
+        if user and compare_digest(user.password, data['password']):
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(user.id)
+            return {
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }, 200
+        return {'message': "Invalid credations"}
+
+
+class UserLogout(Resource):
+    @jwt_required()
+    def post(cls):
+        jti = get_jwt()["jti"]
+        blocklist.add(jti)
+        return {"message": "Successfully logged out"}, 200
 
 
 class User(Resource):
@@ -47,3 +79,13 @@ class Users(Resource):
         if users:
             return {'Users': [i.json() for i in users]}
         return {'massage': 'Users Not Found'}, 404
+
+
+class TokenRefresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        user_id = get_jwt_identity()
+        new_token = create_access_token(identity=user_id, fresh=True)
+        return {
+            'access_token': new_token
+        }, 200
