@@ -9,7 +9,6 @@ from flask_jwt_extended import (
     jwt_required
 )
 from hmac import compare_digest
-from blocklist import blocklist
 from datetime import datetime, timezone
 
 _user_parser = reqparse.RequestParser()
