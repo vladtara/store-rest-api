@@ -20,7 +20,7 @@ class Store(Resource):
             store = StoreModule(name)
             try:
                 store.save_to_db()
-                return {'massage': 'Store {} is created'.format(name)}
+                return {'massage': 'Store {} is created'.format(name)}, 200
             except:
                 return {'massage': 'An Error while creating the store {}'.format(name)}, 500
 

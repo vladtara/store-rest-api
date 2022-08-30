@@ -12,7 +12,6 @@ class Item(Resource):
     parser.add_argument("store_id", type=float, required=True,
                         help="This field must have store id!")
 
-    @jwt_required()
     def get(self, name):
         item = ItemModule.find_by_name(name)
         if item:
@@ -55,25 +54,15 @@ class Item(Resource):
 
     @jwt_required()
     def delete(self, name):
-        claims = get_jwt()
-        if not claims['admin']:
-            return {'massage': "Admin privilege required"}, 401
         item = ItemModule.find_by_name(name)
         if item:
             item.delete_from_db()
-            return {'message': "An item with name '{}' is deleted.".format(name)}
+            return {'message': "An item with name '{}' is deleted.".format(name)}, 200
         else:
             return {'message': "An item with name '{}' not exist.".format(name)}, 404
 
 
 class Items(Resource):
-    @jwt_required(optional=True)
     def get(self):
-        user_id = get_jwt_identity()
         items = [item.json() for item in ItemModule.select_all()]
-        if user_id:
-            return {'items': items}
-        else:
-            return {'items': [item['name'] for item in items],
-                    'message': 'More details after your login'
-                    }
+        return {'items': items}, 200
