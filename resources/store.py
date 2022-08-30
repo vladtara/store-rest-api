@@ -5,14 +5,14 @@ from modules.store import StoreModule
 
 class Store(Resource):
     @jwt_required()
-    def get(self, name):
+    def get(self, name: str):
         store = StoreModule.find_by_name(name)
         if store:
             return store.json()
         return {'massage': 'Store not found'}, 404
 
     @jwt_required()
-    def post(self, name):
+    def post(self, name: str):
         store = StoreModule.find_by_name(name)
         if store:
             return {'massage': 'Store with the {} alredy exisist'.format(name)}, 400
@@ -25,7 +25,7 @@ class Store(Resource):
                 return {'massage': 'An Error while creating the store {}'.format(name)}, 500
 
     @jwt_required()
-    def delet(self, name):
+    def delet(self, name: str):
         store = StoreModule.find_by_name(name)
         if store:
             try:

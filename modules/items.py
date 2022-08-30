@@ -1,4 +1,5 @@
 from db import db
+from typing import Dict, List
 
 
 class ItemModule(db.Model):
@@ -6,16 +7,16 @@ class ItemModule(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name = db.Column(db.String(80), unique=True)
     price = db.Column(db.Float(precision=2))
     store_id = db.Column(db.Integer, db.ForeignKey("stores.id"))
 
-    def __init__(self, name, price, store_id):
+    def __init__(self, name: str, price: float, store_id: int):
         self.name = name
         self.price = price
         self.store_id = store_id
 
-    def json(self):
+    def json(self) -> Dict:
         return {
             'id': self.id,
             'name': self.name,
@@ -24,17 +25,17 @@ class ItemModule(db.Model):
         }
 
     @classmethod
-    def find_by_name(cls, name):
+    def find_by_name(cls, name: str):
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def select_all(cls):
+    def select_all(cls) -> List:
         return cls.query.all()
 
-    def delete_from_db(self):
+    def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()
 
-    def save_to_db(self):
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()

@@ -10,9 +10,9 @@ class Blocklist(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
 
     @classmethod
-    def find_by_jti(cls, jti_id):
+    def find_by_jti(cls, jti_id: int):
         return cls.query.filter_by(jti=jti_id).scalar()
 
-    def add_jti(self):
+    def add_jti(self) -> None:
         db.session.add(self)
         db.session.commit()

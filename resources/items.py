@@ -1,4 +1,3 @@
-from email import message
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from modules.items import ItemModule
@@ -12,14 +11,14 @@ class Item(Resource):
     parser.add_argument("store_id", type=float, required=True,
                         help="This field must have store id!")
 
-    def get(self, name):
+    def get(self, name: str):
         item = ItemModule.find_by_name(name)
         if item:
             return item.json()
         return {'message': 'Item not found'}, 404
 
     @jwt_required(fresh=True)
-    def post(self, name):
+    def post(self, name: str):
         if ItemModule.find_by_name(name):
             return {'message': "An item with name '{}' already exists.".format(name)}, 400
         else:
@@ -32,7 +31,7 @@ class Item(Resource):
             return item.json(), 201
 
     @jwt_required()
-    def put(self, name):
+    def put(self, name: str):
         data = Item.parser.parse_args()
         item = ItemModule.find_by_name(name)
         if item:
@@ -53,7 +52,7 @@ class Item(Resource):
             return {'message': "An item with name '{}' is created.".format(name)}, 201
 
     @jwt_required()
-    def delete(self, name):
+    def delete(self, name: str):
         item = ItemModule.find_by_name(name)
         if item:
             item.delete_from_db()
