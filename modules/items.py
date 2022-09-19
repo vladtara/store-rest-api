@@ -1,5 +1,7 @@
 from db import db
-from typing import Dict, List
+from typing import Dict, List, Union
+
+ItemJSON = Dict[str, Union[int, str, float]]
 
 
 class ItemModule(db.Model):
@@ -16,7 +18,7 @@ class ItemModule(db.Model):
         self.price = price
         self.store_id = store_id
 
-    def json(self) -> Dict:
+    def json(self) -> ItemJSON:
         return {
             'id': self.id,
             'name': self.name,
@@ -25,11 +27,11 @@ class ItemModule(db.Model):
         }
 
     @classmethod
-    def find_by_name(cls, name: str):
+    def find_by_name(cls, name: str) -> "ItemModule":
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def select_all(cls) -> List:
+    def select_all(cls) -> List["ItemModule"]:
         return cls.query.all()
 
     def delete_from_db(self) -> None:
